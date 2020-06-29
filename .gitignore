@@ -10,3 +10,4 @@ todo.txt
 htmlcov
 *.sqlite
 .venv/*
+.pytest_cache
