@@ -1,4 +1,21 @@
-<h1>Home</h1>
-{% if user.is_authenticated %}
-<p>Welcome {{ user.username }}</p>
-{% endif %}
+{% extends "base.html" %}
+
+{% block nav_links %}
+    <li><a href="/">HOME</a></li>
+    {% if not user.is_authenticated %}
+        <li><a href="/account/login">LOG IN</a></li>
+        <li><a href="/account/signup">SIGN UP</a> </li>
+    {% endif %}
+    {% if user.is_authenticated %}
+        <li><a href="/flashcards">FLASHCARDS</a></li>
+        <li><a href="/account/logout">LOGOUT</a></li>
+    {% endif %}
+{% endblock %}
+
+{% block header %}
+    <h1>Welcome to flashes!</h1>
+    <h4>This is a sample text!</h4>
+{% endblock %}
+
+{% block contents %}
+{% endblock %}

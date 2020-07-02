@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'django.contrib.sites',
-    'users.apps.UsersConfig',
+    'flashcards.users.apps.UsersConfig',
     'flashcards.flashes.apps.FlashesConfig'
 ]
 
