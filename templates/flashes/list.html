@@ -1,2 +1,6 @@
-<h1>List view</h1>
-<p>TODO</p>
+<h1>Flashcards list</h1>
+<ul>
+    {% for flash in user.flash_set.all %}
+        <li><a href="{{ flash.get_absolute_url }}">{{ flash.title }}</a></li>
+    {% endfor %}
+</ul>
