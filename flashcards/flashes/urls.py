@@ -7,5 +7,5 @@ app_name = 'flashes'
 urlpatterns = [
     path('', views.FlashcardListView.as_view(), name='list'),
     path('create/', views.FlashcardCreateView.as_view(), name='create'),
-    path('<str:username>/<int:pk>', views.FlashcardDetailView.as_view(), name='detail')
+    path('<int:pk>', views.FlashcardDetailView.as_view(), name='detail')
 ]

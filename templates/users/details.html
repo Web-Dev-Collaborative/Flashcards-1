@@ -3,5 +3,11 @@
 {% block title %}Account details{% endblock %}
 
 {% block header_section %}
-    <h1>Account details</h1>
+    {% if user.last_name %}
+        <h1>{{ user.last_name }}'s account details</h1>
+    {% else %}
+        <h1>Account details</h1>
+    {% endif %}
+    <h2>User: {{ user.username }}</h2>
+    <h3><a href="{% url "users:password_change" %}">Change password</a></h3>
 {% endblock %}

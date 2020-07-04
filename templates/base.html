@@ -3,15 +3,14 @@
 {% block title %}Flashcards{% endblock %}
 
 {% block nav_bar %}
-    <li><a href="/">HOME</a></li>
+    <li><a href="{% url "home" %}">HOME</a></li>
     {% if not user.is_authenticated %}
-        <li><a href="/account/login">LOG IN</a></li>
-        <li><a href="/account/signup">SIGN UP</a></li>
-    {% endif %}
-    {% if user.is_authenticated %}
-        <li><a href="/flashcards">FLASHCARDS</a></li>
-        <li><a href="/account">YOUR ACCOUNT</a></li>
-        <li><a href="/account/logout">LOGOUT</a></li>
+        <li><a href="{% url "users:login" %}">LOG IN</a></li>
+        <li><a href="{% url "users:signup" %}">SIGN UP</a></li>
+    {% else %}
+        <li><a href="{% url "flashes:list" %}">FLASHCARDS</a></li>
+        <li><a href="{% url "users:userdetails" %}">YOUR ACCOUNT</a></li>
+        <li><a href="{% url "users:logout" %}">LOGOUT</a></li>
     {% endif %}
 {% endblock %}
 
