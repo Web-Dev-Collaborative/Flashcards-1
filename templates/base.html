@@ -10,6 +10,9 @@
     {% else %}
         <li><a href="{% url "flashes:list" %}">FLASHCARDS</a></li>
         <li><a href="{% url "users:userdetails" %}">YOUR ACCOUNT</a></li>
+        {% if user.is_superuser %}
+            <li><a href="{% url "admin:index" %}">ADMIN PANEL</a></li>
+        {% endif %}
         <li><a href="{% url "users:logout" %}">LOGOUT</a></li>
     {% endif %}
 {% endblock %}
