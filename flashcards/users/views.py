@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse
+from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView
 
@@ -27,6 +27,4 @@ class SignupView(View):
 
 class UserDetailsView(LoginRequiredMixin, TemplateView):
     template_name = 'users/details.html'
-
-    def get_login_url(self):
-        return reverse("users:login")
+    login_url = reverse_lazy('users:login')
