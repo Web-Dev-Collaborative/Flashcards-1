@@ -18,8 +18,8 @@ class FlashcardDetailView(LoginRequiredMixin, DetailView):
 
     def get_queryset(self):
         """Only allows the creator to see the flashcard"""
-        # Can also filter from the model
-        return super().get_queryset().filter(created_by=self.request.user)
+        # return super().get_queryset().filter(created_by=self.request.user)
+        return self.request.user.flash_set.all()
 
 
 class FlashcardCreateView(LoginRequiredMixin, CreateView):
@@ -39,9 +39,15 @@ class FlashcardUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "flashes/create.html"
     login_url = reverse_lazy('users:login')
 
+    def get_queryset(self):
+        return self.request.user.flash_set.all()
+
 
 class FlashcardDeleteView(LoginRequiredMixin, DeleteView):
     model = Flash
     success_url = reverse_lazy('flashes:list')
     login_url = reverse_lazy('users:login')
     template_name = "flashes/delete.html"
+
+    def get_queryset(self):
+        return self.request.user.flash_set.all()
