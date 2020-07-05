@@ -2,8 +2,6 @@ from os import path
 
 import environ
 
-
-
 ROOT = environ.Path(__file__).path('../' * 2)
 ENV = environ.Env(DJANGO_DEBUG=(bool, False), )
 if path.isfile(ROOT('.env')):
@@ -23,7 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'flashcards.users.apps.UsersConfig',
-    'flashcards.flashes.apps.FlashesConfig'
+    'flashcards.flashes.apps.FlashesConfig',
+    'crispy_forms',
 ]
 
 AUTHENTICATION_BACKENDS = (
@@ -99,3 +98,5 @@ ALLOWED_HOSTS = ['*']
 STATIC_ROOT = ROOT('staticfiles')
 STATICFILES_DIRS = ['static']
 STATIC_URL = '/static/'
+
+CRISPY_TEMPLATE_PACK = 'bootstrap4'

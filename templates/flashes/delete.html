@@ -1,5 +1,22 @@
-<form method="post">
-    {% csrf_token %}
-    <p>Are you sure you want to delete "{{ object }}"?</p>
-    <input type="submit" value="Confirm">
-</form>
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="content-section">
+        <form method="post">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">
+                    Are you sure you want to delete this flashcard?
+                </legend>
+                <h2>{{ flash.title }}</h2>
+                <small class="text-muted">Last updated on {{ flash.updated_at|date }}</small>
+                <br>
+                <small>{{ object.content|truncatechars:200 }}</small>
+            </fieldset>
+            <a href="{{ object.get_absolute_url }}">
+                <button type="button" class="btn btn-outline-primary">No, return</button>
+            </a>
+            <button type="submit" class="btn btn-danger">Yes, delete this flashcard</button>
+        </form>
+    </div>
+{% endblock %}

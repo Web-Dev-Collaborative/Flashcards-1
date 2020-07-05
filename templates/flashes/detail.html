@@ -1,4 +1,18 @@
-<h1>{{ object.title }}</h1>
-<h3>Last Modified: {{ object.updated_at|date }}</h3>
-<p>{{ object.content|linebreaksbr }}</p>
+{% extends "base.html" %}
 
+{% block content %}
+    <div class="content-section">
+        <legend class="border-bottom mb4">{{ object.title }}</legend>
+        <small>Last updated: {{ object.updated_at|date }}</small>
+        <br><br>
+        <p class="text-justify">{{ object.content|linebreaksbr }}</p>
+
+        <a href="{% url "flashes:update" flash.pk %}">
+            <button type="button" class="btn btn-outline-primary">Edit</button>
+        </a>
+
+        <a href="{% url "flashes:delete" flash.pk %}">
+            <button type="button" class="btn btn-outline-danger">Delete</button>
+        </a>
+    </div>
+{% endblock %}

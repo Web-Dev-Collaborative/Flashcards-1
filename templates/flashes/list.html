@@ -1,8 +1,24 @@
-<h1>Flashcards list</h1>
-<ul>
-    {% for flash in user.flash_set.all %}
-        <li><a href="{{ flash.get_absolute_url }}">{{ flash.title }}</a></li>
-    {% endfor %}
-</ul>
+{% extends "base.html" %}
 
-<p><a href="{% url "flashes:create" %}">Create one!</a></p>
+{% block sidebar %}
+    {# Empty sidebar when on the list view #}
+{% endblock %}
+
+{% block content %}
+
+    <p><a href="{% url "flashes:create" %}">Create one!</a></p>
+
+    {% for flash in user.flash_set.all %}
+        <article class="media content-section">
+            <div class="media-body">
+                <h2>
+                    <a class="article-title" href="{{ flash.get_absolute_url }}">{{ flash.title }}</a>
+                </h2>
+                <small class="text-muted">Last updated on {{ flash.updated_at|date }}</small>
+                <br>
+                <small>{{ flash.content|truncatechars:200 }}</small>
+            </div>
+        </article>
+    {% endfor %}
+
+{% endblock %}

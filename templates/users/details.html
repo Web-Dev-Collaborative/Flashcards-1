@@ -2,12 +2,14 @@
 
 {% block title %}Account details{% endblock %}
 
-{% block header_section %}
-    {% if user.last_name %}
-        <h1>{{ user.last_name }}'s account details</h1>
-    {% else %}
-        <h1>Account details</h1>
-    {% endif %}
-    <h2>User: {{ user.username }}</h2>
-    <h3><a href="{% url "users:password_change" %}">Change password</a></h3>
+{% block content %}
+    <div class="content-section">
+        {% if user.last_name %}
+            <legend class="border-bottom mb-4">{{ user.last_name }} account details</legend>
+        {% else %}
+            <legend class="border-bottom mb-4">Account details</legend>
+        {% endif %}
+        <h6>User: {{ user.username }}</h6>
+        <h6><a href="{% url "users:password_change" %}">Change password</a></h6>
+    </div>
 {% endblock %}
