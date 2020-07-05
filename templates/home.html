@@ -1,2 +1,5 @@
-{% extends "base.html" %}
-
+{% if user.is_authenticated %}
+    <meta http-equiv="refresh" content="0; URL={% url "flashes:list" %}" />
+{% else %}
+    <meta http-equiv="refresh" content="0; URL={% url "users:login" %}" />
+{% endif %}
