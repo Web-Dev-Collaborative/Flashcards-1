@@ -1,6 +1,6 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView
@@ -20,9 +20,10 @@ class SignupView(View):
         form = self.form_class(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect('/account/login/')
+            messages.success(request, 'Account created successfully')
+            return redirect('users:login')
         else:  # Invalid form
-            return HttpResponseRedirect('/account/signup/')
+            return render(request, self.template_name, {'form': form})
 
 
 class UserDetailsView(LoginRequiredMixin, TemplateView):
