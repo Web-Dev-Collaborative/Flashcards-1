@@ -17,8 +17,8 @@ class TestFlashcardViewsIncludingCreator(TestCase):
         self.client = Client()
         self.user1 = User.objects.create_user('test_username', 'testmail@example.com', 'testing321')
         self.user2 = User.objects.create_user('test_username2', 'testmail2@example.com', 'testing321')
-        self.flash = Flash.objects.create(id=1, title='Sample title for user1', content='Sample content',
-                                          created_by=self.user1, updated_at=datetime.now())
+        self.flash = Flash.objects.create(title='Sample title for user1', content='Sample content',
+                                          created_by=self.user1)
 
     def test_create_flash_includes_creator(self):
         """ Tests that creating a flashcard adds the user to the database """
