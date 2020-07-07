@@ -3,8 +3,8 @@ from django.db import models
 from django.urls import reverse
 
 
-class Flash(models.Model):
-    """ Flashcard model """
+class Note(models.Model):
+    """ Note model """
     title = models.CharField('Title', max_length=200)
     content = models.TextField('Content')
     updated_at = models.DateTimeField('Last modified on', auto_now=True)
@@ -18,4 +18,4 @@ class Flash(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('flashes:detail', args=(self.pk,))
+        return reverse('notes:detail', args=(self.pk,))

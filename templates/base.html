@@ -39,7 +39,7 @@
                         <a class="nav-item nav-link" href="{% url "users:signup" %}">Sign up</a>
                     {% else %}
                         <a class="nav-item nav-link" href="{% url "users:userdetails" %}">Account</a>
-                        <a class="nav-item nav-link" href="{% url "flashes:list" %}">Flashcards</a>
+                        <a class="nav-item nav-link" href="{% url "notes:list" %}">Notes</a>
                         {% if user.is_superuser %}
                             <a class="nav-item nav-link" href="{% url "admin:index" %}">Admin Panel</a>
                         {% endif %}
@@ -65,12 +65,12 @@
         {% block sidebar %}
             <div class="col-md-4">
                 <div class="content-section">
-                    <h3>Flashcard list</h3>
+                    <h3>Note list</h3>
                     <p class='text-muted'>You can put any information here you'd like.
                     <ul class="list-group">
-                        {% for flash in user.flash_set.all %}
+                        {% for note in user.note_set.all %}
                                 <li class="list-group-item list-group-item-light">
-                                    <a href="{{ flash.get_absolute_url }}">{{ flash.title }}</a>
+                                    <a href="{{ note.get_absolute_url }}">{{ note.title }}</a>
                                 </li>
                         {% endfor %}
                     </ul>

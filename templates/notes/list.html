@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <div class="content-section">
+        <p><a href="{% url "notes:create" %}">
+            <button type="button" class="btn btn-primary">Create one!</button>
+        </a></p>
+
+        {% for note in user.note_set.all %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <h2>
+                        <a class="article-title" href="{{ note.get_absolute_url }}">{{ note.title }}</a>
+                    </h2>
+                    <small class="text-muted">Last updated on {{ note.updated_at|date }}</small>
+                    <br>
+                    <small>{{ note.content|truncatechars:200 }}</small>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock %}

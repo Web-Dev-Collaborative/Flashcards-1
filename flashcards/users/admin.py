@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from flashcards.users.models import User
-from flashcards.flashes.models import Flash
+from flashcards.notes.models import Note
 
 admin.site.register(User)
-admin.site.register(Flash)
+admin.site.register(Note)

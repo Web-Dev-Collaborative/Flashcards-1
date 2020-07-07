@@ -7,11 +7,11 @@
         <br><br>
         <p class="text-justify">{{ object.content|linebreaksbr }}</p>
 
-        <a href="{% url "flashes:update" flash.pk %}">
+        <a href="{% url "notes:update" note.pk %}">
             <button type="button" class="btn btn-outline-primary">Edit</button>
         </a>
 
-        <a href="{% url "flashes:delete" flash.pk %}">
+        <a href="{% url "notes:delete" note.pk %}">
             <button type="button" class="btn btn-outline-danger">Delete</button>
         </a>
     </div>

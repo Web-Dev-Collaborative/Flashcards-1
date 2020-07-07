@@ -21,7 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'flashcards.users.apps.UsersConfig',
-    'flashcards.flashes.apps.FlashesConfig',
+    'flashcards.notes.apps.NotesConfig',
     'crispy_forms',
 ]
 
