@@ -8,4 +8,5 @@ def test_flash_get_absolute_url():
 
 def test_flash_string():
     flash = Flash(id=5, title='Test flashcard', content='something not important')
-    assert flash.title == str(flash) == 'Test flashcard'
+    assert flash.title == str(flash)
+    assert str(flash) == 'Test flashcard'
