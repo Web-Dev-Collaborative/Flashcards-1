@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'flashcards.users.apps.UsersConfig',
     'flashcards.notes.apps.NotesConfig',
+    'flashcards.leitner.apps.LeitnerConfig',
     'crispy_forms',
 ]
 
