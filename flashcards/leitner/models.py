@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import QuerySet
+from django.urls import reverse
 
 """
 Models for the Leitner System, see  https://en.wikipedia.org/wiki/Leitner_system
@@ -39,6 +40,9 @@ class Deck(models.Model):
             field = '-created_at'
         return self.boxes.order_by(field)
 
+    def __str__(self):
+        return self.description
+
 
 class Box(models.Model):
     description = models.CharField('Box description', max_length=150)
@@ -60,13 +64,16 @@ class Box(models.Model):
             field = '-updated_at'
         return self.cards.order_by(field)
 
+    def __str__(self):
+        return f'DecK: {self.deck}, Box: {self.description}'
+
 
 class Card(models.Model):
     front_text = models.CharField('Front text', max_length=150)
     back_text = models.TextField('Back text')
     # color = ???? may use django-colorfield https://pypi.org/project/django-colorfield/
     updated_at = models.DateTimeField('Last modified on', auto_now=True)
-    on_deck = models.ForeignKey(to=Deck, on_delete=models.SET_NULL, related_name='cards', null=True, default=None)
+    on_deck = models.ForeignKey(to=Deck, on_delete=models.CASCADE, related_name='cards')
     on_box = models.ForeignKey(to=Box, on_delete=models.SET_NULL, related_name='cards', null=True, default=None)
 
     def move_to_box(self, box: Box) -> None:

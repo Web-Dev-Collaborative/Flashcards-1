@@ -8,5 +8,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', TemplateView.as_view(template_name="home.html"), name='home'),
     path('account/', include('flashcards.users.urls', namespace='users')),
-    path('notes/', include('flashcards.notes.urls', namespace='notes'))
+    path('notes/', include('flashcards.notes.urls', namespace='notes')),
+    path('leitner/', include('flashcards.leitner.urls', namespace='leitner')),
 ]
