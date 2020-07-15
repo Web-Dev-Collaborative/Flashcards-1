@@ -2,16 +2,15 @@
 {% load crispy_forms_filters %}
 {% load crispy_forms_tags %}
 
-
 {% block content %}
     <div class="content-section">
         <form method="post">
             {% csrf_token %}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">{{ action }} note</legend>
+                <legend class="border-bottom mb4">Add card to deck "{{ deck.description }}"</legend>
                 {{ form|crispy }}
             </fieldset>
-            <input class="btn btn-outline-info" type="submit" value="{{ action }}">
+            <input class="btn btn-outline-info" type="submit" value="{{ action }} card">
         </form>
     </div>
 {% endblock %}

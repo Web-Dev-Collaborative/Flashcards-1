@@ -1,6 +1,23 @@
 from django import forms
 
-from flashcards.leitner.models import Box, Card
+from flashcards.leitner.models import Box, Card, Deck, Session
+
+
+class DeckCreationForm(forms.Form):
+    description = forms.CharField(label='Deck description', max_length=150)
+
+    class Meta:
+        model = Deck
+        fields = ('description',)
+
+
+class CardUpdateForm(forms.Form):
+    front_text = forms.CharField(label='Front text', max_length=150)
+    back_text = forms.CharField(label='Back text', widget=forms.Textarea)
+
+    class Meta:
+        model = Card
+        fields = ('front_text', 'back_text')
 
 
 class BoxCreationForm(forms.Form):
@@ -30,3 +47,15 @@ class CardCreationForm(forms.Form):
     def __init__(self, deck, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['on_box'].queryset = Box.objects.filter(deck=deck)
+
+
+class SessionSelectBoxForm(forms.Form):
+    current_box = forms.ModelChoiceField('Select a box to use', queryset=Box.objects.none(), required=True)
+
+    class Meta:
+        model = Session
+        fields = ('current_box',)
+
+    def __init__(self, deck, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['selected_box'].queryset = Box.objects.filter(deck=deck)

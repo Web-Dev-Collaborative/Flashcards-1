@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for card in cards %}
+        <h5>{{ card.front_text }}</h5>
+    {% endfor %}
+{% endblock %}

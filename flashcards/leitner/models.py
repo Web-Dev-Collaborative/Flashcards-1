@@ -43,11 +43,15 @@ class Deck(models.Model):
     def __str__(self):
         return self.description
 
+    def get_absolute_url(self):
+        return reverse('leitner:deck-detail', args=(self.pk,))
+
 
 class Box(models.Model):
     description = models.CharField('Box description', max_length=150)
     deck = models.ForeignKey(to=Deck, on_delete=models.CASCADE, related_name='boxes')
     created_at = models.DateTimeField('Box creation date (determines box order)', auto_now_add=True)
+    in_session = models.BooleanField('Box currently in session?', default=False)
 
     def get_cards(self, ascending: bool = True) -> QuerySet:
         """
@@ -65,7 +69,7 @@ class Box(models.Model):
         return self.cards.order_by(field)
 
     def __str__(self):
-        return f'DecK: {self.deck}, Box: {self.description}'
+        return f'Box: {self.description}'
 
 
 class Card(models.Model):
@@ -87,3 +91,10 @@ class Card(models.Model):
             raise KeyError('Box not in the current deck')
         self.on_box = box
         self.save()
+
+
+class Session(models.Model):
+    deck = models.ForeignKey(Deck, on_delete=models.CASCADE, related_name='session')
+    current_box = models.ForeignKey(Box, on_delete=models.CASCADE, related_name='session')
+    total_cards_on_box = models.IntegerField('Total cards of the current box')
+    is_finished = models.BooleanField('Is the session finished?', default=True)

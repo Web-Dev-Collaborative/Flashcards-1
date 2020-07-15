@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_filters %}
+
+{% block content %}
+    <div class="content-section">
+        <form method="post">
+            {% csrf_token %}
+            <legend class="border-bottom mb4">Need a deck? <a href="#" onclick="showCreateDeckForm()">Create one</a>
+            </legend>
+            <div id="deckCreateForm" style="display:none;">
+                <fieldset class="form-group">
+                    {{ form|crispy }}
+                </fieldset>
+                <input class="btn btn-outline-info" type="submit" value="Create deck">
+            </div>
+        </form>
+        {% for deck in decks %}
+            <article class="media content-section">
+                <div class="media-body">
+                    <h2>
+                        <a class="article-title"
+                           href="{% url "leitner:deck-detail" deck.pk %}">{{ deck.description }}</a>
+                    </h2>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock %}
