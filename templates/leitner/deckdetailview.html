@@ -1,21 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
+
     <div class="content-section">
-        <h1>Deck: {{ deck.description }}</h1>
-        {% for box in deck.boxes.all %}
-            <article class="media content-section">
-                <h2>
-                    <a class="article-title"
-                       href="{% url "leitner:view-box" deck_pk=deck.pk box_pk=box.pk %}">{{ box.description }}</a>
-                </h2>
-                <ul class="list-group">
-                    {% for card in box.cards.all %}
-                        <li class="list-group-item">{{ card.front_text }}</li>
-                    {% endfor %}
-                    <h3><a href="{% url "leitner:add-card" deck_pk=deck.pk %}">Add a card</a></h3>
-                </ul>
-            </article>
-        {% endfor %}
-        <h3>Need a box? <a href="{% url "leitner:add-box" deck_pk=deck.pk %}">Create one</a></h3>
+
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Deck: {{ deck.description }}</legend>
+        </fieldset>
+
+        <p>
+                <a class="ml-2" href="{% url 'leitner:add-card' deck_pk=deck.pk %}">Create card</a>
+                <br>
+                <a class="ml-2" href="{% url 'leitner:session' deck_pk=deck.pk %}">Start or continue your study session</a>
+        </p>
+
+        <div class="list-group">
+            {% for box in boxes %}
+                <div class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ box.description }}</h5>
+                        <small>Last used: {{ box.last_used_text }}</small>
+                    </div>
+                    <ul>
+                        {% for card in box.cards.all %}
+                            <li><a class="text-info" href="{% url 'leitner:card-update' deck_pk=deck.pk card_pk=card.pk %}">
+                                <p class="mb-1">{{ card.front_text }}</p></a></li>
+                            {#<small class="text-muted">Muted small text</small>#}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
     </div>
+
+
 {% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    <div class="content-section">
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Study session</legend>
+        </fieldset>
+        <h4>Card: {{ card.front_text }}</h4>
+        <h5><a href="#" onclick="showCardAnswer()">Click here to reveal the answer</a></h5>
+        <div id="cardAnswer" style="display:none;">
+            <h5>{{ card.back_text|linebreaksbr }}</h5>
+            <h6>Did you get it right?</h6>
+            <form method="post">
+                {% csrf_token %}
+                <input type="submit" value="Yes" name="_correct">
+                <input type="submit" value="No" name="_incorrect">
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

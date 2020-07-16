@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load crispy_forms_filters %}
+
+
+{% block content %}
+
+    <div class="content-section">
+
+    <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Start a study session</legend>
+    </fieldset>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <input class="btn btn-outline-info" type="submit" value="Start session">
+        </form>
+
+    </div>
+{% endblock %}

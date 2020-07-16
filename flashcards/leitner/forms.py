@@ -20,14 +20,6 @@ class CardUpdateForm(forms.Form):
         fields = ('front_text', 'back_text')
 
 
-class BoxCreationForm(forms.Form):
-    description = forms.CharField(label='Box description', max_length=150)
-
-    class Meta:
-        model = Box
-        fields = ('description',)
-
-
 class CardCreationForm(forms.Form):
     front_text = forms.CharField(label='Front text', max_length=150)
     back_text = forms.CharField(widget=forms.Textarea, label='Back text')
@@ -50,7 +42,7 @@ class CardCreationForm(forms.Form):
 
 
 class SessionSelectBoxForm(forms.Form):
-    current_box = forms.ModelChoiceField('Select a box to use', queryset=Box.objects.none(), required=True)
+    current_box = forms.ModelChoiceField(label='Select box to use', queryset=Box.objects.none())
 
     class Meta:
         model = Session
@@ -58,4 +50,4 @@ class SessionSelectBoxForm(forms.Form):
 
     def __init__(self, deck, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['selected_box'].queryset = Box.objects.filter(deck=deck)
+        self.fields['current_box'].queryset = Box.objects.filter(deck=deck).order_by('box_type')

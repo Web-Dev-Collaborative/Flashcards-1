@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="content-section">
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Study session finished</legend>
+        </fieldset>
+        <h5>You finished the session!</h5>
+        <h6>Confirm exit?</h6>
+
+        <form method="post">
+            {% csrf_token %}
+            <input class="btn btn-outline-info" type="submit" value="Yes, mark session as finished!">
+        </form>
+    </div>
+{% endblock %}

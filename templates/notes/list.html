@@ -3,6 +3,9 @@
 
 {% block content %}
     <div class="content-section">
+        <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Your notes</legend>
+        </fieldset>
         <p><a href="{% url "notes:create" %}">
             <button type="button" class="btn btn-primary">Create one!</button>
         </a></p>

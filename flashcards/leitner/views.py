@@ -1,13 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseNotFound
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
-from django.views.generic import DetailView
 
-from flashcards.leitner.forms import BoxCreationForm, CardCreationForm, DeckCreationForm, CardUpdateForm, \
+from flashcards.leitner.forms import CardCreationForm, DeckCreationForm, CardUpdateForm, \
     SessionSelectBoxForm
-from flashcards.leitner.models import Deck, Box, Card, Session
+from flashcards.leitner.models import Deck, Card, Session
 
 
 class DeckListView(LoginRequiredMixin, View):
@@ -24,58 +25,22 @@ class DeckListView(LoginRequiredMixin, View):
         # This is used to create a box in the same view
         form = self.form_class(request.POST)
         if form.is_valid():
-            Deck.objects.create(
-                description=form.cleaned_data['description'],
-                created_by=request.user
-            )
+            deck = Deck.objects.create(description=form.cleaned_data['description'], created_by=request.user)
+            deck.create_boxes()
             messages.success(request, 'Deck created successfully')
         else:
             messages.warning(request, 'Could not create the deck, make sure the field was not empty')
         return redirect('leitner:deck-list')
 
 
-class DeckDetailView(LoginRequiredMixin, DetailView):
-    template_name = "leitner/deckdetailview.html"
-    model = Deck
-    login_url = reverse_lazy('users:login')
-
-    def get_queryset(self):
-        return self.request.user.decks.all()
-
-
-class BoxCreationView(LoginRequiredMixin, View):
-    template_name = "leitner/boxcreationview.html"
-    form_class = BoxCreationForm
+class DeckDetailView(LoginRequiredMixin, View):
+    template_name = 'leitner/deckdetailview.html'
     login_url = reverse_lazy('users:login')
 
     def get(self, request, *args, **kwargs):
         deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
-        form = self.form_class()
-        return render(request, self.template_name, {'form': form, 'deck': deck})
-
-    def post(self, request, *args, **kwargs):
-        deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            Box.objects.create(
-                description=form.cleaned_data['description'],
-                deck=deck
-            )
-            messages.success(request, 'Box created succesfully')
-            return redirect("leitner:deck-detail", deck.pk)
-        else:
-            return render(request, self.template_name, {'form': form, 'deck': deck})
-
-
-class BoxDetailView(LoginRequiredMixin, View):
-    template_name = "leitner/boxdetailview.html"
-    login_url = reverse_lazy('users:login')
-
-    def get(self, request, *args, **kwargs):
-        deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
-        box = get_object_or_404(Box, pk=kwargs['box_pk'], deck=deck)
-        context = {'box': box, 'deck': deck}
-        return render(request, self.template_name, context)
+        boxes = deck.boxes.order_by('box_type')
+        return render(request, self.template_name, {'deck': deck, 'boxes': boxes})
 
 
 class CardCreationView(LoginRequiredMixin, View):
@@ -103,15 +68,6 @@ class CardCreationView(LoginRequiredMixin, View):
         else:
             messages.warning(request, 'Could not create the card, try again')
             return render(request, self.template_name, {'form': form, 'deck': deck})
-
-
-class CardListView(LoginRequiredMixin, View):
-    template_name = "leitner/cardlistview.html"
-    login_url = reverse_lazy('users:login')
-
-    def get(self, request, *args, **kwargs):
-        deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
-        return render(request, self.template_name, {'cards': (deck.cards.all()), 'deck': deck})
 
 
 class CardUpdateView(LoginRequiredMixin, View):
@@ -142,7 +98,7 @@ class CardUpdateView(LoginRequiredMixin, View):
 
 
 class CardDeleteView(LoginRequiredMixin, View):
-    template_name = "letner/carddelete.html"
+    template_name = "notes/delete.html"  # ToDo: Create a working template
     login_url = reverse_lazy('users:login')
 
     def get(self, request, *args, **kwargs):
@@ -158,31 +114,99 @@ class CardDeleteView(LoginRequiredMixin, View):
         return redirect('leitner:deck-detail', deck.pk)
 
 
-class StudySession(LoginRequiredMixin, View):
+class SessionStartView(LoginRequiredMixin, View):
+    """ View to create a study session """
+    template_name = "leitner/session/start_session.html"
     login_url = reverse_lazy('users:login')
-    start_session_template = None
-    study_session_template = None
-    session_finished_template = None
-    select_box_form = SessionSelectBoxForm
+    form = SessionSelectBoxForm
+
+    def get(self, request, *args, **kwargs):
+        deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
+        if deck.session.exists():
+            if deck.session.get().is_finished:
+                return redirect('leitner:session-finished', deck.pk)
+            return redirect('leitner:session-cards', deck.pk)
+        form = self.form(deck)
+        return render(request, self.template_name, {'form': form, 'deck': deck})
+
+    def post(self, request, *args, **kwargs):
+        deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
+        if deck.session.exists():
+            return HttpResponseNotFound
+        form = self.form(deck, request.POST)
+        if form.is_valid():
+            box = form.cleaned_data['current_box']
+            if box.cards.count() == 0:
+                messages.warning(request, 'The selected box is empty, use another')
+                return redirect('leitner:session', deck.pk)
+            box.in_session = True
+            box.save()
+            Session.objects.create(deck=deck, current_box=box, total_cards_on_box=box.get_cards().count(),
+                                   is_finished=False)
+            messages.success(request, 'Session started!')
+        else:
+            messages.warning(request, 'Could not start session, try again')
+        return redirect('leitner:session', deck.pk)
+
+
+class SessionCardsView(LoginRequiredMixin, View):
+    """ View that shows every card from the selected box """
+    template_name = 'leitner/session/study_session.html'
+    login_url = reverse_lazy('users:login')
 
     def get(self, request, *args, **kwargs):
         deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
         if not deck.session.exists():
-            form = self.select_box_form(deck)
-            return render(request, self.start_session_template, {'deck': deck, 'form': form})
-        else:
-            session = deck.session.get()
-            if not session.is_finished:
-                box = session.current_box
-                return render(request, self.study_session_template, {'deck': deck, 'session': session, 'box': box})
-            return render(request, self.session_finished_template, {'deck': deck, 'session': session})
+            return redirect('leitner:session', deck.pk)
+        if (session := deck.session.get()).is_finished:
+            return redirect('leitner:session-finished', deck.pk)
+        if (card := session.current_card()) is not None:
+            return render(request, self.template_name, {'card': card, 'deck': deck})
+        session.is_finished = True
+        session.save()
+        return redirect('leitner:session-finished', deck.pk)
 
     def post(self, request, *args, **kwargs):
         deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
-        if not deck.session.exists():
-            # Todo: Create a form to select a box to use, update the box to reflect it is currently in use
-            form = self.select_box_form(deck, request.POST)
-            if form.is_valid():
-                Session.objects.create(
+        if not deck.session.exists() or deck.session.get().is_finished:
+            return HttpResponseNotFound
+        session = deck.session.get()
+        if (card := session.current_card()) is not None:
+            if '_correct' in request.POST:
+                card.correct_answer()
+                messages.success(request, 'Got it! That\'s a correct answer!')
+                return redirect('leitner:session-cards', deck.pk)
+            elif '_incorrect' in request.POST:
+                card.wrong_answer()
+                messages.success(request, 'Dang :( Keep going and you\'ll get it next time!')
+                return redirect('leitner:session-cards', deck.pk)
+            else:
+                return HttpResponseNotFound
+        return redirect('leitner:session-finished', deck.pk)
 
-                )
+
+class SessionFinishedView(LoginRequiredMixin, View):
+    """ View to finish the study session """
+    template_name = "leitner/session/finished_session.html"
+    login_url = reverse_lazy('users:login')
+
+    def get(self, request, *args, **kwargs):
+        deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
+        if not deck.session.exists():
+            return redirect('leitner:session', deck.pk)
+        if not deck.session.get().is_finished:
+            return redirect('leitner:session-cards', deck.pk)
+        return render(request, self.template_name, {'session': deck.session.get()})
+
+    def post(self, request, *args, **kwargs):
+        deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
+        if not deck.session.exists() or not deck.session.get().is_finished:
+            return HttpResponseNotFound
+        session = deck.session.get()
+        box = session.current_box
+        box.last_used = timezone.now()
+        box.in_session = False
+        box.save()
+        session.delete()
+        messages.success(request, 'Study session finished!')
+        return redirect('leitner:deck-detail', deck.pk)

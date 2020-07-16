@@ -40,7 +40,7 @@
                     {% else %}
                         <a class="nav-item nav-link" href="{% url "users:userdetails" %}">Account</a>
                         <a class="nav-item nav-link" href="{% url "notes:list" %}">Notes</a>
-                        <a class="nav-item nav-link" href="{% url "leitner:deck-list" %}">Leitner</a>
+                        <a class="nav-item nav-link" href="{% url "leitner:deck-list" %}">Flashcards</a>
                         {% if user.is_superuser %}
                             <a class="nav-item nav-link" href="{% url "admin:index" %}">Admin Panel</a>
                         {% endif %}
@@ -67,7 +67,8 @@
             <div class="col-md-4">
                 <div class="content-section">
                     <h3>Note list</h3>
-                    <p class='text-muted'>You can put any information here you'd like.
+                    <p class='text-muted'>You can put any information here you'd like. Or you can
+                    <a href="{% url 'notes:create' %}">create</a> a new note.</p>
                     <ul class="list-group">
                         {% for note in user.note_set.all %}
                             <li class="list-group-item list-group-item-light">
