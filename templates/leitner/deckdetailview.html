@@ -8,9 +8,9 @@
         </fieldset>
 
         <p>
-                <a class="ml-2" href="{% url 'leitner:add-card' deck_pk=deck.pk %}">Create card</a>
-                <br>
-                <a class="ml-2" href="{% url 'leitner:session' deck_pk=deck.pk %}">Start or continue your study session</a>
+            <a class="ml-2" href="{% url 'leitner:add-card' deck_pk=deck.pk %}">Create card</a>
+            <br>
+            <a class="ml-2" href="{% url 'leitner:session' deck_pk=deck.pk %}">Start or continue your study session</a>
         </p>
 
         <div class="list-group">
@@ -18,17 +18,30 @@
                 <div class="list-group-item list-group-item-action flex-column align-items-start">
                     <div class="d-flex w-100 justify-content-between">
                         <h5 class="mb-1">{{ box.description }}</h5>
-                        <small>Last used: {{ box.last_used_text }}</small>
+
+                        {% if box.in_session %}
+                            <small>Currently in a study session</small>
+                        {% else %}
+                            <small>Last used: {{ box.last_used_text }}</small>
+                        {% endif %}
                     </div>
                     <ul>
                         {% for card in box.cards.all %}
-                            <li><a class="text-info" href="{% url 'leitner:card-update' deck_pk=deck.pk card_pk=card.pk %}">
+                            <li><a class="text-info"
+                                   href="{% url 'leitner:card-update' deck_pk=deck.pk card_pk=card.pk %}">
                                 <p class="mb-1">{{ card.front_text }}</p></a></li>
-                            {#<small class="text-muted">Muted small text</small>#}
                         {% endfor %}
+
                     </ul>
                 </div>
             {% endfor %}
+        </div>
+        <br>
+        <div class="border-top pt-3">
+            <small class="text-muted">
+                Want to delete this deck? <a class="ml-2" href="{% url 'leitner:deck-delete' pk=deck.pk %}">Click
+                here.</a>
+            </small>
         </div>
     </div>
 

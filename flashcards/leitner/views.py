@@ -5,6 +5,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views import View
+from django.views.generic import DeleteView
 
 from flashcards.leitner.forms import CardCreationForm, DeckCreationForm, CardUpdateForm, \
     SessionSelectBoxForm
@@ -41,6 +42,16 @@ class DeckDetailView(LoginRequiredMixin, View):
         deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
         boxes = deck.boxes.order_by('box_type')
         return render(request, self.template_name, {'deck': deck, 'boxes': boxes})
+
+
+class DeckDeleteView(LoginRequiredMixin, DeleteView):
+    model = Deck
+    success_url = reverse_lazy('leitner:deck-list')
+    template_name = "leitner/deckdeleteview.html"
+    login_url = reverse_lazy('users:login')
+
+    def get_queryset(self):
+        return self.request.user.decks.all()
 
 
 class CardCreationView(LoginRequiredMixin, View):
@@ -98,7 +109,7 @@ class CardUpdateView(LoginRequiredMixin, View):
 
 
 class CardDeleteView(LoginRequiredMixin, View):
-    template_name = "notes/delete.html"  # ToDo: Create a working template
+    template_name = "leitner/carddelete.html"
     login_url = reverse_lazy('users:login')
 
     def get(self, request, *args, **kwargs):

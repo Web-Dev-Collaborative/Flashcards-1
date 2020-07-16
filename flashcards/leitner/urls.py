@@ -7,6 +7,7 @@ app_name = 'leitner'
 urlpatterns = [
     path('', views.DeckListView.as_view(), name='deck-list'),
     path('<int:deck_pk>/', views.DeckDetailView.as_view(), name='deck-detail'),
+    path('<int:pk>/delete', views.DeckDeleteView.as_view(), name='deck-delete'),
     path('<int:deck_pk>/session', views.SessionStartView.as_view(), name='session'),
     path('<int:deck_pk>/session/cards', views.SessionCardsView.as_view(), name='session-cards'),
     path('<int:deck_pk>/session/finished', views.SessionFinishedView.as_view(), name='session-finished'),
