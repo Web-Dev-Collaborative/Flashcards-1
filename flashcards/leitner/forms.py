@@ -35,10 +35,9 @@ class CardCreationForm(forms.Form):
 
     # Note to myself: Read this link if you don't remember what is going on here
     # https://simpleisbetterthancomplex.com/questions/2017/03/22/how-to-dynamically-filter-modelchoices-queryset-in-a-modelform.html
-    # I have no idea how to test this form tho....
     def __init__(self, deck, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['on_box'].queryset = Box.objects.filter(deck=deck)
+        self.fields['on_box'].queryset = Box.objects.filter(deck=deck).order_by('box_type')
 
 
 class SessionSelectBoxForm(forms.Form):

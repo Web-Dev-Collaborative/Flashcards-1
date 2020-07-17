@@ -152,7 +152,8 @@ class SessionStartView(LoginRequiredMixin, View):
                 return redirect('leitner:session', deck.pk)
             box.in_session = True
             box.save()
-            Session.objects.create(deck=deck, current_box=box, total_cards_on_box=box.get_cards().count(),
+            Session.objects.create(deck=deck, current_box=box,
+                                   total_cards_on_box=box.cards.count(),
                                    is_finished=False)
             messages.success(request, 'Session started!')
         else:
@@ -211,7 +212,9 @@ class SessionFinishedView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
-        if not deck.session.exists() or not deck.session.get().is_finished:
+        if not deck.session.exists():
+            return HttpResponseNotFound
+        elif not deck.session.get().is_finished:
             return HttpResponseNotFound
         session = deck.session.get()
         box = session.current_box

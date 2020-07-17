@@ -1,8 +1,7 @@
-from typing import Union
+from typing import Optional
 
 from django.conf import settings
 from django.db import models
-from django.db.models import QuerySet
 
 """
 Models for the Leitner System, see  https://en.wikipedia.org/wiki/Leitner_system
@@ -30,21 +29,6 @@ class Box(models.Model):
     box_type = models.IntegerField('0: Everyday, 1: Tue/Thu, 2: Fri')
     last_used = models.DateTimeField(null=True)
 
-    def get_cards(self, ascending: bool = False) -> QuerySet:
-        """
-        Returns a queryset with the cards in the current box
-
-        Args:
-            ascending (bool): Order of the card in the queryset, if true (default) will be in ascending order
-                              (cards added first will be before the newly added ones). If false cards
-                              will be in descending order (last added cards first).
-        """
-        if ascending:
-            field = 'updated_at'
-        else:
-            field = '-updated_at'
-        return self.cards.order_by(field)
-
     def last_used_text(self):
         return 'Never' if self.last_used is None else self.last_used.strftime('%a %d %b %Y %H:%M')
 
@@ -61,20 +45,20 @@ class Card(models.Model):
 
     def correct_answer(self) -> None:
         """
-        Moves the card to the next box, given a correct answer
+        Moves the card to the next box, given a correct answer. Requires the box to be in a session
         """
-        if self.on_box.box_type == 0:
-            self.on_box = self.on_deck.boxes.get(box_type=1)
+        current_box_num = self.on_box.box_type
+
+        if current_box_num < self.on_deck.boxes.count() - 1:
+            # Nothing happens if the card is on the last box
+            self.on_box = self.on_deck.boxes.get(box_type=current_box_num + 1)
             self.save()
-        elif self.on_box.box_type == 1:
-            self.on_box = self.on_deck.boxes.get(box_type=2)
-            self.save()
+
         SessionFinishedCards.objects.create(session=self.on_deck.session.get(), card=self)
-        # Nothing happens if it is on box type 3
 
     def wrong_answer(self) -> None:
         """
-        Moves the card to the box type 0, given a wrong answer
+        Moves the card to the box type 0, given a wrong answer. Requires the box to be in a session
         """
         self.on_box = self.on_deck.boxes.get(box_type=0)
         self.save()
@@ -87,12 +71,16 @@ class Session(models.Model):
     total_cards_on_box = models.IntegerField('Total cards of the current box')
     is_finished = models.BooleanField('Is the session finished?', default=False)
 
-    def current_card(self) -> Union[Card, None]:
-        finished_cards = Card.objects.filter(finished_session__session=self)
-        for card in self.current_box.get_cards():
-            if card not in finished_cards:
-                return card
-        return None
+    def current_card(self) -> Optional[Card]:
+        """
+        Gets the next card to use in the study session
+
+        Returns:
+            Card or None: Next available card. If it doesn't exist returns None
+        """
+        qs = Card.objects.filter(on_box=self.current_box).exclude(finished_session__session=self).order_by(
+            'updated_at').first()
+        return qs
 
 
 class SessionFinishedCards(models.Model):
