@@ -105,7 +105,7 @@ class CardUpdateView(LoginRequiredMixin, View):
             messages.success(request, 'Card modified correctly')
         else:
             messages.warning(request, 'No changes have been made to the card')
-        return redirect('leitner:card-list', deck.pk)
+        return redirect('leitner:deck-detail', deck.pk)
 
 
 class CardDeleteView(LoginRequiredMixin, View):
