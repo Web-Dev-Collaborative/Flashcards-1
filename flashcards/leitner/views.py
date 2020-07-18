@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -143,7 +143,7 @@ class SessionStartView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
         if deck.session.exists():
-            return HttpResponseNotFound
+            return HttpResponseForbidden()
         form = self.form(deck, request.POST)
         if form.is_valid():
             box = form.cleaned_data['current_box']
@@ -180,8 +180,10 @@ class SessionCardsView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
-        if not deck.session.exists() or deck.session.get().is_finished:
-            return HttpResponseNotFound
+        if not deck.session.exists():
+            return HttpResponseForbidden()
+        elif deck.session.get().is_finished:
+            return HttpResponseForbidden()
         session = deck.session.get()
         if (card := session.current_card()) is not None:
             if '_correct' in request.POST:
@@ -193,8 +195,7 @@ class SessionCardsView(LoginRequiredMixin, View):
                 messages.success(request, 'Dang :( Keep going and you\'ll get it next time!')
                 return redirect('leitner:session-cards', deck.pk)
             else:
-                return HttpResponseNotFound
-        return redirect('leitner:session-finished', deck.pk)
+                return HttpResponseForbidden()
 
 
 class SessionFinishedView(LoginRequiredMixin, View):
@@ -213,9 +214,9 @@ class SessionFinishedView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         deck = get_object_or_404(Deck, pk=kwargs['deck_pk'], created_by=request.user)
         if not deck.session.exists():
-            return HttpResponseNotFound
+            return HttpResponseForbidden()
         elif not deck.session.get().is_finished:
-            return HttpResponseNotFound
+            return HttpResponseForbidden()
         session = deck.session.get()
         box = session.current_box
         box.last_used = timezone.now()
