@@ -2,7 +2,7 @@ import pytest
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from flashcards.leitner.models import Deck, Box, Card
+from flashcards.leitner.models import Deck, Box, Card, Session
 from flashcards.users.models import User
 
 pytestmark = pytest.mark.django_db
@@ -78,6 +78,7 @@ class TestCardRelatedViews(TestCase):
         self.deck = Deck.objects.create(description='Nothing important', created_by=self.user)
 
     def test_card_creation_view_get(self):
+        """ Asserts the get method works """
         url = reverse('leitner:add-card', args=(self.deck.pk,))
 
         response = self.client.get(url)
@@ -85,6 +86,7 @@ class TestCardRelatedViews(TestCase):
         self.assertEquals(response.status_code, 200)
 
     def test_card_creation_view_post_valid_form(self):
+        """ Asserts a card is correctly created given a valid form"""
         url = reverse('leitner:add-card', args=(self.deck.pk,))
         box = Box.objects.create(description='Box', deck=self.deck, box_type=0)
         data = {'front_text': 'Front text', 'back_text': 'Back text', 'on_box': box.pk}
@@ -96,6 +98,7 @@ class TestCardRelatedViews(TestCase):
         self.assertNotEqual(last_card_before, new_card)
 
     def test_card_creation_view_post_invalid_form(self):
+        """ Asserts a card is not created when submitting an invalid form """
         url = reverse('leitner:add-card', args=(self.deck.pk,))
         data = {'front_text': 'Front text', 'back_text': 'Back text', 'on_box': ''}
 
@@ -106,6 +109,7 @@ class TestCardRelatedViews(TestCase):
         self.assertEqual(last_card_before, new_card)
 
     def test_card_update_view_get(self):
+        """ Asserts the get method works correctly """
         box = Box.objects.create(description='...', deck=self.deck, box_type=0)
         card = Card.objects.create(front_text='Before change', back_text='Before change',
                                    on_deck=self.deck, on_box=box)
@@ -116,6 +120,7 @@ class TestCardRelatedViews(TestCase):
         self.assertEquals(response.status_code, 200)
 
     def test_card_update_view_post_valid_form(self):
+        """ Asserts the card is modified correctly after a valid post """
         box = Box.objects.create(description='...', deck=self.deck, box_type=0)
         card = Card.objects.create(front_text='Before change', back_text='Before change',
                                    on_deck=self.deck, on_box=box)
@@ -131,6 +136,7 @@ class TestCardRelatedViews(TestCase):
         self.assertEquals(card.back_text, 'After change')
 
     def test_card_update_view_post_invalid_form(self):
+        """ Asserts the card is not modified after an invalid post """
         box = Box.objects.create(description='..', deck=self.deck, box_type=0)
         card = Card.objects.create(front_text='No change', back_text='No change',
                                    on_deck=self.deck, on_box=box)
@@ -145,6 +151,7 @@ class TestCardRelatedViews(TestCase):
         self.assertEquals(card.back_text, 'No change')
 
     def test_card_delete_view_get(self):
+        """ Asserts the get method works """
         box = Box.objects.create(description='...', deck=self.deck, box_type=0)
         card = Card.objects.create(front_text='Before change', back_text='Before change',
                                    on_deck=self.deck, on_box=box)
@@ -156,6 +163,7 @@ class TestCardRelatedViews(TestCase):
 
     # noinspection PyTypeChecker
     def test_card_delete_view_post(self):
+        """ Asserts the card is deleted """
         box = Box.objects.create(description='...', deck=self.deck, box_type=0)
         card = Card.objects.create(front_text='Before change', back_text='Before change',
                                    on_deck=self.deck, on_box=box)
@@ -164,19 +172,80 @@ class TestCardRelatedViews(TestCase):
         self.client.post(url)
 
         self.assertRaises(Card.DoesNotExist, card.refresh_from_db)
-#
-#
-# class TestSessionRelatedViews(TestCase):
-#
-#     def setUp(self) -> None:
-#         self.client = Client()
-#         self.user = User.objects.create_user('testuser', 'a@a.com', 'testing321')
-#
-#     def test_session_start_view(self):
-#         pass
-#
-#     def test_session_cards_view(self):
-#         pass
-#
-#     def test_session_finished_view(self):
-#         pass
+
+
+# noinspection DuplicatedCode
+class TestSessionRelatedViews(TestCase):
+
+    def setUp(self) -> None:
+        self.user = User.objects.create_user('testuser', 'a@a.com', 'testing321')
+        self.client = Client()
+        self.client.force_login(self.user)
+
+        self.deck = Deck.objects.create(description='Test deck', created_by=self.user)
+        self.deck.create_boxes()
+
+        self.box1 = self.deck.boxes.get(box_type=0)
+        self.box2 = self.deck.boxes.get(box_type=1)
+        self.box3 = self.deck.boxes.get(box_type=2)
+
+        for i in range(10):
+            Card.objects.create(front_text=f'Card {i} front text', back_text=f'Card {i} back text',
+                                on_deck=self.deck, on_box=self.box1)
+
+        self.start_session_url = reverse('leitner:session', args=(self.deck.pk,))
+        self.study_session_url = reverse('leitner:session-cards', args=(self.deck.pk,))
+        self.session_finished_url = reverse('leitner:session-finished', args=(self.deck.pk,))
+
+    # GET method tests
+
+    def test_session_redirects_when_session_exists(self):
+        """ """
+        session = Session.objects.create(deck=self.deck, current_box=self.box1,
+                                         total_cards_on_box=10, is_finished=False)
+
+        response = self.client.get(self.start_session_url)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(self.session_finished_url)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(self.study_session_url)
+        self.assertEquals(response.status_code, 200)
+
+    def test_session_redirect_when_session_does_not_exist(self):
+        response = self.client.get(self.start_session_url)
+        self.assertEquals(response.status_code, 200)
+        response = self.client.get(self.session_finished_url)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(self.study_session_url)
+        self.assertEquals(response.status_code, 302)
+
+    def test_session_redirect_when_session_finished(self):
+        session = Session.objects.create(deck=self.deck, current_box=self.box1,
+                                         total_cards_on_box=10, is_finished=True)
+
+        response = self.client.get(self.start_session_url)
+        self.assertEquals(response.status_code, 302)
+        response = self.client.get(self.session_finished_url)
+        self.assertEquals(response.status_code, 200)
+        response = self.client.get(self.study_session_url)
+        self.assertEquals(response.status_code, 302)
+
+    # POST method tests
+
+    def test_session_start_view_post_with_valid_form(self):
+        pass
+
+    def test_session_start_view_with_invalid_form(self):
+        pass
+
+    def test_session_cards_view_with_correct_answer_post(self):
+        pass
+
+    def test_session_cards_view_with_incorrect_answer_post(self):
+        pass
+
+    def test_session_cards_view_with_invalid_post(self):
+        pass
+
+    def test_session_finished_view_post_method(self):
+        pass
