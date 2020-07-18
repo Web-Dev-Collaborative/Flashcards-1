@@ -15,18 +15,18 @@ class TestLeitnerModelsBasics(TestCase):
     def test_box_creation(self):
         deck = Deck.objects.create(description='Test deck', created_by=self.user)
         deck.create_boxes()
-        self.assertEquals(Box.objects.filter(deck=deck).count(), 3)
+        self.assertEqual(Box.objects.filter(deck=deck).count(), 3)
 
     def test_deck_str_method(self):
         deck = Deck.objects.create(description='Test deck', created_by=self.user)
-        self.assertEquals(str(deck), 'Test deck')
-        self.assertEquals(deck.__str__(), 'Test deck')
+        self.assertEqual(str(deck), 'Test deck')
+        self.assertEqual(deck.__str__(), 'Test deck')
 
     def test_box_str_method(self):
         deck = Deck.objects.create(description='Test deck', created_by=self.user)
         box = Box.objects.create(description='Nothing interesting',
                                  deck=deck, box_type=0)
-        self.assertEquals(str(box), 'Box: Nothing interesting | Last used: Never')
+        self.assertEqual(str(box), 'Box: Nothing interesting | Last used: Never')
 
 
 # noinspection DuplicatedCode
@@ -50,7 +50,7 @@ class TestLeitnerModelsMethods(TestCase):
 
         card.correct_answer()
 
-        self.assertEquals(card.on_box, self.box2)
+        self.assertEqual(card.on_box, self.box2)
         self.assertNotEqual(card.on_box, self.box1)
         self.assertNotEqual(card.on_box, self.box3)
 
@@ -64,7 +64,7 @@ class TestLeitnerModelsMethods(TestCase):
 
         card.correct_answer()
 
-        self.assertEquals(card.on_box, self.box3)
+        self.assertEqual(card.on_box, self.box3)
         self.assertNotEqual(card.on_box, self.box1)
         self.assertNotEqual(card.on_box, self.box2)
 
@@ -77,7 +77,7 @@ class TestLeitnerModelsMethods(TestCase):
 
         card.wrong_answer()
 
-        self.assertEquals(card.on_box, self.box1)
+        self.assertEqual(card.on_box, self.box1)
         self.assertNotEqual(card.on_box, self.box2)
         self.assertNotEqual(card.on_box, self.box3)
 
@@ -99,5 +99,5 @@ class TestLeitnerModelsMethods(TestCase):
         session = Session.objects.create(deck=self.deck, current_box=self.box1,
                                          total_cards_on_box=self.box1.cards.count())
 
-        self.assertEquals(session.total_cards_on_box, 4)
-        self.assertEquals(session.current_card(), card1)
+        self.assertEqual(session.total_cards_on_box, 4)
+        self.assertEqual(session.current_card(), card1)

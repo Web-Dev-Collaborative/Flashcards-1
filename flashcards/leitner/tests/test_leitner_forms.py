@@ -20,10 +20,10 @@ class TestLeitnerForms(TestCase):
         form = CardCreationForm(self.deck)
 
         for idx, box in enumerate(self.boxes):
-            self.assertEquals(box, form.fields['on_box'].queryset[idx])
+            self.assertEqual(box, form.fields['on_box'].queryset[idx])
 
     def test_session_select_box_form(self):
         form = SessionSelectBoxForm(self.deck)
 
         for idx, box in enumerate(self.boxes):
-            self.assertEquals(box, form.fields['current_box'].queryset[idx])
+            self.assertEqual(box, form.fields['current_box'].queryset[idx])
